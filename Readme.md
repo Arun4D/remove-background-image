@@ -1,19 +1,21 @@
-#BGRemover
+# Background Remover
 
-## Step1: Install the Required Libraries
+## Layer Size larger than 50 MB < 250 MB
+
+### Step1: Install the Required Libraries
 ````bash
 mkdir -p python
 cd python
 pip install rembg -t .
 ````
 
-## Step2: Zip the Contents:
+### Step2: Zip the Contents:
 
 ````bash
 zip -r rembg_layer.zip .
 ````
 
-## Step 3: Upload the Zip File to AWS:
+### Step 3: Upload the Zip File to AWS:
 Use S3 for Larger Layers
 
 If your zipped layer is larger than 50 MB, you must upload it to an S3 bucket and reference it in AWS Lambda.
@@ -26,8 +28,9 @@ aws lambda publish-layer-version --layer-name rembg_layer \
 --compatible-runtimes python3.13
 
 ````
+## Layer Size larger than > 250 MB
 
-## Step 4: Create EC2 :
+### Step 1: Create EC2 :
 
 Create ec2 and create EFS with below details
 
@@ -57,7 +60,7 @@ Root directory creation permissions
 
 ````
 
-## Step 4: Login to VM:
+### Step 2: Login to VM:
 login to vm 
 
 ````bash
@@ -76,7 +79,7 @@ Dockerfile
 FROM python:3.13-slim
 RUN pip install rembg
 ````
-## Step 4: Build and Run the Container:
+### Step 3: Build and Run the Container:
 
 ````bash
 sudo docker build -t rembg-install .
