@@ -5,6 +5,7 @@ import logging
 import base64
 from io import BytesIO
 from botocore.exceptions import NoCredentialsError, ClientError
+from datetime import datetime
 
 # Initialize logging
 logger = logging.getLogger()
@@ -26,22 +27,22 @@ def lambda_handler(event, context):
         if "file-name" not in headers:
             return {"statusCode": 400, "body": json.dumps({"error": "Missing 'file-name' header"})}
 
-        file_name = headers["file-name"]
-        file_key = f"{INPUT_FOLDER_NAME}/{file_name}"
+        original_file_name = headers["file-name"]
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        new_file_name = f"{os.path.splitext(original_file_name)[0]}_input_{timestamp}{os.path.splitext(original_file_name)[1]}"
+        file_key = f"{INPUT_FOLDER_NAME}/{new_file_name}"
 
         # Check if the file content is Base64 encoded
         if event["isBase64Encoded"]:
-            # Decode Base64 content properly
             file_content = BytesIO(base64.b64decode(event["body"]))  # Convert to binary
         else:
-            # If not Base64, assume it's a file upload (multipart/form-data)
             try:
                 file_content = BytesIO(event["body"].encode("utf-8"))  # Handle plain file upload
             except Exception as e:
                 logger.error(f"Failed to handle file content: {str(e)}")
                 return {"statusCode": 400, "body": json.dumps({"error": "Failed to process file content"})}
 
-        # Upload the file to S3 without specifying ContentType (let S3 handle it)
+        # Upload the file to S3
         s3_client.put_object(
             Bucket=S3_BUCKET,
             Key=file_key,
@@ -61,7 +62,11 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "body": json.dumps({"message": "File uploaded successfully", "file_url": file_url})
+            "body": json.dumps({
+                "message": "File uploaded successfully",
+                "file_url": file_url,
+                "file_name": new_file_name
+            })
         }
 
     except NoCredentialsError:

@@ -51,6 +51,8 @@ def upload_image():
         # Show response
         if response.status_code == 200:
             result = response.json()
+            response_body = json.loads(result.get("body", "{}"))
+            file_name = response_body.get("file_name", "")
             print(result)
             messagebox.showinfo("Success", f"Image uploaded successfully!")
         else:
@@ -81,6 +83,9 @@ def process_image():
         print("Response Text:", response.text)
         
         if response.status_code == 200:
+            result = response.json()
+            response_body = result.get("body", {})
+            file_name = response_body.get("file_name", "")
             messagebox.showinfo("Success", "Image processed successfully!")
         else:
             messagebox.showerror("Error", f"Failed to process image.\nResponse: {response.text}")
