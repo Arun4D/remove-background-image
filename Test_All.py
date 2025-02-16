@@ -10,7 +10,6 @@ UPLOAD_API_URL = "https://<<replace>>.execute-api.us-west-1.amazonaws.com/prod/n
 PROCESS_API_URL = "https://<<replace>>.execute-api.us-west-1.amazonaws.com/prod/neesoft/bgremove/process"
 DOWNLOAD_API_URL = "https://<<replace>>.execute-api.us-west-1.amazonaws.com/prod/neesoft/bgremove/download"
 API_KEY = "<<replace>>"
-BUCKET_NAME = "<<replace>>"
 file_name = ""  # Global variable to store uploaded file name
 
 def upload_image():
@@ -72,11 +71,9 @@ def process_image():
             "Content-Type": "application/json",
         }
         payload = {
-            "bucket": BUCKET_NAME,
-            "key": file_name
+            "file_name": file_name
         }
 
-        print("Headers:", headers)
         print("Payload:", payload)
         response = requests.post(PROCESS_API_URL, headers=headers, json=payload)
         print("Response Status Code:", response.status_code)
@@ -102,7 +99,7 @@ def download_image():
             "x-api-key": API_KEY,
             "Content-Type": "application/json",
         }
-        print("Headers:", headers)
+
         response = requests.get(f"{DOWNLOAD_API_URL}?file_name={file_name}", headers=headers)
         print("Response Status Code:", response.status_code)
         print("Response Text:", response.text)
