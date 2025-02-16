@@ -6,13 +6,13 @@ from botocore.exceptions import NoCredentialsError
 # Initialize S3 client
 s3_client = boto3.client('s3')
 S3_BUCKET = os.environ['S3_BUCKET']  # Get bucket name from environment variables
-output_folder_name = "output"
+OUTPUT_FOLDER_NAME = os.environ.get("OUTPUT_FOLDER_NAME")
 
 def lambda_handler(event, context):
     try:
         # Get the file name from the query parameters
         file_name = event['queryStringParameters']['file_name']
-        key = f'{output_folder_name}/{file_name}'
+        key = f'{OUTPUT_FOLDER_NAME}/{file_name}'
 
         # Generate a pre-signed URL for the file
         presigned_url = s3_client.generate_presigned_url(

@@ -14,7 +14,7 @@ logger.setLevel(logging.INFO)
 # Initialize S3 client
 s3_client = boto3.client("s3")
 S3_BUCKET = os.environ.get("S3_BUCKET")  # Get bucket name from environment variables
-INPUT_FOLDER_NAME = "input"
+INPUT_FOLDER_NAME = os.environ.get("INPUT_FOLDER_NAME")
 
 def lambda_handler(event, context):
     try:

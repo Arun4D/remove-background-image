@@ -19,13 +19,15 @@ def lambda_handler(event, context):
     try:
         # Initialize S3 client
         s3 = boto3.client("s3")
-        bucket = event.get("bucket")
-        image_name = event.get("key")
-        if not bucket or not image_name:
-            return {"statusCode": 400, "body": "Missing 'bucket' or 'key' in request"}
+        #bucket = event.get("bucket")
+        S3_BUCKET = os.environ.get("S3_BUCKET")
+        image_name = event.get("file_name")
+        if not image_name:
+            return {"statusCode": 400, "body": "Missing 'file_name' in request"}
         
-        input_folder_name = "input"
-        output_folder_name = "output"
+        INPUT_FOLDER_NAME = os.environ.get("INPUT_FOLDER_NAME")
+        OUTPUT_FOLDER_NAME = os.environ.get("OUTPUT_FOLDER_NAME")
+        
         
         # Extract the base name (e.g., "ad_test203") from the input image name
         base_name = re.sub(r'_input_.*', '', image_name)
@@ -35,11 +37,11 @@ def lambda_handler(event, context):
         output_image_name = f"{base_name}_nobg_{timestamp}.png"
         
         # Construct the S3 object keys
-        input_key = f"{input_folder_name}/{image_name}"
-        output_key = f"{output_folder_name}/{output_image_name}"
+        input_key = f"{INPUT_FOLDER_NAME}/{image_name}"
+        output_key = f"{OUTPUT_FOLDER_NAME}/{output_image_name}"
         
         print(f"Downloading image from S3: {input_key}...")
-        response = s3.get_object(Bucket=bucket, Key=input_key)
+        response = s3.get_object(Bucket=S3_BUCKET, Key=input_key)
         input_image = Image.open(io.BytesIO(response["Body"].read()))
 
         # Remove background
@@ -53,17 +55,18 @@ def lambda_handler(event, context):
 
         print("Uploading processed image to S3")
         s3.put_object(
-            Bucket=bucket,
+            Bucket=S3_BUCKET,
             Key=output_key,
             Body=output_buffer,
             ContentType="image/png"
         )
 
+        file_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{output_key}"
         return {
             "statusCode": 200,
             "body": {
                 "message": "File processed successfully",
-                "output_key": output_key,
+                "file_url": file_url,
                 "file_name": output_image_name
             }
         }
