@@ -11,8 +11,9 @@ from rembg import remove
 from PIL import Image
 import io
 import boto3
-from datetime import datetime
+from datetime import datetime, timezone
 from botocore.exceptions import NoCredentialsError, ClientError
+import re
 
 def lambda_handler(event, context):
     try:
@@ -26,9 +27,12 @@ def lambda_handler(event, context):
         input_folder_name = "input"
         output_folder_name = "output"
         
+        # Extract the base name (e.g., "ad_test203") from the input image name
+        base_name = re.sub(r'_input_.*', '', image_name)
+        
         # Generate timestamped output filename
-        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-        output_image_name = f"{os.path.splitext(image_name)[0]}_nobg_{timestamp}.png"
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")  # Use timezone.utc
+        output_image_name = f"{base_name}_nobg_{timestamp}.png"
         
         # Construct the S3 object keys
         input_key = f"{input_folder_name}/{image_name}"

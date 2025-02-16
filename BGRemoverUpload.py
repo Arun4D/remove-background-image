@@ -5,7 +5,7 @@ import logging
 import base64
 from io import BytesIO
 from botocore.exceptions import NoCredentialsError, ClientError
-from datetime import datetime
+from datetime import datetime, timezone  # Import timezone explicitly
 
 # Initialize logging
 logger = logging.getLogger()
@@ -28,7 +28,7 @@ def lambda_handler(event, context):
             return {"statusCode": 400, "body": json.dumps({"error": "Missing 'file-name' header"})}
 
         original_file_name = headers["file-name"]
-        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")  # Use timezone.utc
         new_file_name = f"{os.path.splitext(original_file_name)[0]}_input_{timestamp}{os.path.splitext(original_file_name)[1]}"
         file_key = f"{INPUT_FOLDER_NAME}/{new_file_name}"
 
